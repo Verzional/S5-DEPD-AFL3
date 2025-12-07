@@ -5,7 +5,7 @@ class Costs extends Equatable {
   final String? code;
   final String? service;
   final String? description;
-  final int? cost;
+  final double? cost;
   final String? etd;
 
   const Costs({
@@ -22,7 +22,7 @@ class Costs extends Equatable {
     code: json['code'] as String?,
     service: json['service'] as String?,
     description: json['description'] as String?,
-    cost: json['cost'] as int?,
+    cost: (json['cost'] as num?)?.toDouble(),
     etd: json['etd'] as String?,
   );
 

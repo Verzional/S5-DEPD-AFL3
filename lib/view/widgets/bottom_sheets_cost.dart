@@ -66,7 +66,7 @@ Widget _buildDetailRow(String label, String value) {
 }
 
 // Helper function to format currency
-String _formatCurrency(int? value) {
+String _formatCurrency(num? value) {
   if (value == null) return 'Rp0,00';
   final formatter = NumberFormat.currency(
     locale: 'id_ID',

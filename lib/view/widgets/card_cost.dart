@@ -11,7 +11,7 @@ class CardCost extends StatefulWidget {
 
 class _CardCostState extends State<CardCost> {
   // Memformat angka menjadi mata uang Rupiah
-  String rupiahMoneyFormatter(int? value) {
+  String rupiahMoneyFormatter(num? value) {
     if (value == null) return "Rp0,00";
     final formatter = NumberFormat.currency(
       locale: 'id_ID',

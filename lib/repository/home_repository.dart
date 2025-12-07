@@ -92,6 +92,25 @@ class HomeRepository {
     return data.map((e) => Country.fromJson(e)).toList();
   }
 
+  // Mencari destinasi internasional
+  Future<List<InternationalDestination>> fetchInternationalDestination(String search) async {
+    final response = await _apiServices.getApiResponse(
+      'destination/international-destination?search=$search&limit=99&offset=0',
+    );
+
+    // Validasi response meta
+    final meta = response['meta'];
+    if (meta == null || meta['status'] != 'success') {
+      throw Exception("API Error: ${meta?['message'] ?? 'Unknown error'}");
+    }
+
+    // Parse data
+    final data = response['data'];
+    if (data is! List) return [];
+
+    return data.map((e) => InternationalDestination.fromJson(e)).toList();
+  }
+
   // Menghitung biaya pengiriman internasional
   Future<List<Costs>> checkInternationalShipmentCost(
     String origin,
@@ -106,6 +125,7 @@ class HomeRepository {
           "destination": destination,
           "weight": weight.toString(),
           "courier": courier,
+          // "price": "lowest", // Optional: sort by price
         });
 
     // Validasi response meta

@@ -13,7 +13,7 @@ class _MainPageState extends State<MainPage> {
   static const List<Widget> _pages = <Widget>[
     DomesticPage(),
     InternationalPage(),
-    ProfilePage(),
+    HistoryPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -33,7 +33,7 @@ class _MainPageState extends State<MainPage> {
             icon: Icon(Icons.flight),
             label: 'International',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'History'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,

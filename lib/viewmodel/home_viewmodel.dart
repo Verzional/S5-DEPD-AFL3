@@ -102,6 +102,13 @@ class HomeViewModel with ChangeNotifier {
     notifyListeners();
   }
 
+  // History List
+  List<History> historyList = [];
+  void addHistory(History history) {
+    historyList.insert(0, history); // Add to top
+    notifyListeners();
+  }
+
   // Hitung biaya pengiriman (set loading + handle success/error). Terdapat objek yang merepresentasikan nilai (atau error) yang akan tersedia di masa depan (asynchronous)
   Future checkShipmentCost(
     String origin,
@@ -125,6 +132,23 @@ class HomeViewModel with ChangeNotifier {
         .then((value) {
           setCostList(ApiResponse.completed(value));
           setLoading(false);
+
+          // Add to history
+          try {
+            final originName = cityOriginList.data?.firstWhere((e) => e.id.toString() == origin).name ?? origin;
+            final destinationName = cityDestinationList.data?.firstWhere((e) => e.id.toString() == destination).name ?? destination;
+            
+            addHistory(History(
+              type: "Domestic",
+              origin: originName,
+              destination: destinationName,
+              weight: weight,
+              courier: courier,
+              timestamp: DateTime.now(),
+            ));
+          } catch (e) {
+            print("Error adding history: $e");
+          }
         })
         .onError((error, _) {
           setCostList(ApiResponse.error(error.toString()));
@@ -153,6 +177,31 @@ class HomeViewModel with ChangeNotifier {
         });
   }
 
+  // State daftar destinasi internasional (hasil search)
+  ApiResponse<List<InternationalDestination>> internationalDestinationList = ApiResponse.notStarted();
+  setInternationalDestinationList(ApiResponse<List<InternationalDestination>> response) {
+    internationalDestinationList = response;
+    notifyListeners();
+  }
+
+  // Cari destinasi internasional
+  Future getInternationalDestination(String query) async {
+    setInternationalDestinationList(ApiResponse.loading());
+    _homeRepo
+        .fetchInternationalDestination(query)
+        .then((value) {
+          setInternationalDestinationList(ApiResponse.completed(value));
+        })
+        .onError((error, _) {
+          setInternationalDestinationList(ApiResponse.error(error.toString()));
+        });
+  }
+
+  // Clear search results
+  void clearInternationalDestination() {
+    setInternationalDestinationList(ApiResponse.notStarted());
+  }
+
   // State daftar biaya ongkir internasional
   ApiResponse<List<Costs>> internationalCostList = ApiResponse.notStarted();
   setInternationalCostList(ApiResponse<List<Costs>> response) {
@@ -179,6 +228,23 @@ class HomeViewModel with ChangeNotifier {
         .then((value) {
           setInternationalCostList(ApiResponse.completed(value));
           setLoading(false);
+
+          // Add to history
+          try {
+            final originName = cityOriginList.data?.firstWhere((e) => e.id.toString() == origin).name ?? origin;
+            final destinationName = internationalDestinationList.data?.firstWhere((e) => e.id.toString() == destination).name ?? destination;
+            
+            addHistory(History(
+              type: "International",
+              origin: originName,
+              destination: destinationName,
+              weight: weight,
+              courier: courier,
+              timestamp: DateTime.now(),
+            ));
+          } catch (e) {
+            print("Error adding history: $e");
+          }
         })
         .onError((error, _) {
           setInternationalCostList(ApiResponse.error(error.toString()));

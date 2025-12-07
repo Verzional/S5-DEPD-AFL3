@@ -11,17 +11,18 @@ class _InternationalPageState extends State<InternationalPage> {
   late HomeViewModel homeViewModel;
 
   final weightController = TextEditingController();
+  final searchController = TextEditingController();
 
   // Daftar pilihan kurir yang tersedia untuk internasional
-  final List<String> courierOptions = ["dhl", "pos", "tiki"];
-  String selectedCourier = "dhl";
+  final List<String> courierOptions = ["pos", "tiki", "jne", "expedito"];
+  String selectedCourier = "pos";
 
   // ID kota asal (domestik)
   int? selectedProvinceOriginId;
   int? selectedCityOriginId;
 
-  // Kode negara tujuan
-  String? selectedCountryCode;
+  // ID Destinasi Internasional
+  int? selectedDestinationId;
 
   @override
   void initState() {
@@ -32,16 +33,12 @@ class _InternationalPageState extends State<InternationalPage> {
         homeViewModel.getProvinceList();
       });
     }
-    if (homeViewModel.countryList.status == Status.notStarted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        homeViewModel.getCountryList();
-      });
-    }
   }
 
   @override
   void dispose() {
     weightController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -236,45 +233,70 @@ class _InternationalPageState extends State<InternationalPage> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-                        // Dropdown negara tujuan
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: searchController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Cari Negara/Kota',
+                                  hintText: 'Contoh: Malaysia, Jepang',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: () {
+                                if (searchController.text.isNotEmpty) {
+                                  homeViewModel.getInternationalDestination(searchController.text);
+                                  setState(() {
+                                    selectedDestinationId = null;
+                                  });
+                                }
+                              },
+                              icon: const Icon(Icons.search),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        // Dropdown hasil search
                         Consumer<HomeViewModel>(
                           builder: (context, vm, _) {
-                            if (vm.countryList.status == Status.loading) {
-                              return const SizedBox(
-                                height: 40,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
+                            if (vm.internationalDestinationList.status == Status.loading) {
+                              return const Center(child: CircularProgressIndicator());
                             }
-                            if (vm.countryList.status == Status.error) {
-                              return Text(
-                                vm.countryList.message ?? 'Error',
-                                style: const TextStyle(color: Colors.red),
-                              );
+                            if (vm.internationalDestinationList.status == Status.error) {
+                              return Text(vm.internationalDestinationList.message ?? "Error", style: const TextStyle(color: Colors.red));
                             }
+                            if (vm.internationalDestinationList.status == Status.completed) {
+                                final destinations = vm.internationalDestinationList.data ?? [];
+                                if (destinations.isEmpty) return const Text("Tidak ditemukan");
+                                
+                                // Ensure selectedDestinationId exists in the items list
+                                int? validValue = selectedDestinationId;
+                                if (validValue != null && !destinations.any((e) => e.id == validValue)) {
+                                  validValue = null;
+                                }
 
-                            final countries = vm.countryList.data ?? [];
-                            if (countries.isEmpty) {
-                              return const Text('Tidak ada negara');
+                                return DropdownButton<int>(
+                                  isExpanded: true,
+                                  value: validValue,
+                                  hint: const Text("Pilih Tujuan"),
+                                  items: destinations.map((e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(e.name ?? "-"),
+                                  )).toList(),
+                                  onChanged: (val) {
+                                    setState(() {
+                                      selectedDestinationId = val;
+                                    });
+                                  },
+                                );
                             }
-
-                            return DropdownButton<String>(
-                              isExpanded: true,
-                              value: selectedCountryCode,
-                              hint: const Text('Pilih negara tujuan'),
-                              items: countries
-                                  .map(
-                                    (country) => DropdownMenuItem(
-                                      value: country.code,
-                                      child: Text(country.name ?? ''),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (newCode) {
-                                setState(() => selectedCountryCode = newCode);
-                              },
-                            );
+                            return const SizedBox.shrink();
                           },
                         ),
                         const SizedBox(height: 12),
@@ -285,7 +307,7 @@ class _InternationalPageState extends State<InternationalPage> {
                             onPressed: () {
                               // Validasi semua field sudah terisi
                               if (selectedCityOriginId != null &&
-                                  selectedCountryCode != null &&
+                                  selectedDestinationId != null &&
                                   weightController.text.isNotEmpty &&
                                   selectedCourier.isNotEmpty) {
                                 final weight =
@@ -302,7 +324,7 @@ class _InternationalPageState extends State<InternationalPage> {
                                 // Panggil API untuk cek ongkir internasional
                                 homeViewModel.checkInternationalShipmentCost(
                                   selectedCityOriginId!.toString(),
-                                  selectedCountryCode!,
+                                  selectedDestinationId!.toString(),
                                   weight,
                                   selectedCourier,
                                 );
@@ -382,7 +404,7 @@ class _InternationalPageState extends State<InternationalPage> {
                             padding: EdgeInsets.all(16.0),
                             child: Center(
                               child: Text(
-                                "Pilih kota asal, negara tujuan dan klik Hitung Ongkir Internasional terlebih dulu.",
+                                "Pilih kota asal, cari & pilih tujuan, lalu klik Hitung Ongkir Internasional.",
                                 style: TextStyle(color: Colors.black),
                               ),
                             ),
