@@ -1,13 +1,13 @@
 part of 'pages.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class DomesticPage extends StatefulWidget {
+  const DomesticPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<DomesticPage> createState() => _DomesticPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _DomesticPageState extends State<DomesticPage> {
   // Variabel akan diinisialisasi nanti, tetapi pasti sebelum digunakan. Dart tidak mengizinkan variabel non-nullable tanpa nilai awal karena homeViewModel baru bisa diakses setelah widget "hidup", yaitu di initState() ketika Provider.of() sudah bisa digunakan.
   late HomeViewModel homeViewModel;
 

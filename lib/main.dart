@@ -6,9 +6,7 @@ import 'package:depd_mvvm_2025/view/pages/pages.dart';
 import 'package:depd_mvvm_2025/viewmodel/home_viewmodel.dart';
 
 Future<void> main() async {
-  // Memastikan binding Flutter sudah diinisialisasi sebelum menjalankan aplikasi
   WidgetsFlutterBinding.ensureInitialized();
-  // Memuat file .env sebelum diakses widget
   await dotenv.load(fileName: ".env");
 
   runApp(const MyApp());
@@ -57,7 +55,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         initialRoute: '/',
-        routes: {'/': (context) => const HomePage()},
+        routes: {'/': (context) => const MainPage()},
       ),
     );
   }
