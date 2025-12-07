@@ -42,6 +42,7 @@ class _CardCostState extends State<CardCost> {
       ),
       color: Colors.white,
       child: ListTile(
+        onTap: () => showCostDetailsBottomSheet(context, cost),
         title: Text(
           style: TextStyle(
             color: Colors.blue[800],
@@ -70,6 +71,7 @@ class _CardCostState extends State<CardCost> {
           backgroundColor: Colors.blue[50],
           child: Icon(Icons.local_shipping, color: Colors.blue[800]),
         ),
+        trailing: Icon(Icons.arrow_forward_ios, color: Colors.blue[800]),
       ),
     );
   }

@@ -73,4 +73,51 @@ class HomeRepository {
 
     return data.map((e) => Costs.fromJson(e)).toList();
   }
+
+  // Mengambil daftar negara untuk pengiriman internasional
+  Future<List<Country>> fetchCountryList() async {
+    final response = await _apiServices.getApiResponse('destination/country');
+
+    // Validasi response meta
+    final meta = response['meta'];
+    if (meta == null || meta['status'] != 'success') {
+      throw Exception("API Error: ${meta?['message'] ?? 'Unknown error'}");
+    }
+
+    // Parse data negara
+    final data = response['data'];
+    if (data is! List) return [];
+
+    // Ubah setiap item (Map) menjadi object Country
+    return data.map((e) => Country.fromJson(e)).toList();
+  }
+
+  // Menghitung biaya pengiriman internasional
+  Future<List<Costs>> checkInternationalShipmentCost(
+    String origin,
+    String destination,
+    int weight,
+    String courier,
+  ) async {
+    // Kirim request POST untuk kalkulasi ongkir internasional
+    final response = await _apiServices
+        .postApiResponse('calculate/international-cost', {
+          "origin": origin,
+          "destination": destination,
+          "weight": weight.toString(),
+          "courier": courier,
+        });
+
+    // Validasi response meta
+    final meta = response['meta'];
+    if (meta == null || meta['status'] != 'success') {
+      throw Exception("API Error: ${meta?['message'] ?? 'Unknown error'}");
+    }
+
+    // Parse data biaya pengiriman
+    final data = response['data'];
+    if (data is! List) return [];
+
+    return data.map((e) => Costs.fromJson(e)).toList();
+  }
 }

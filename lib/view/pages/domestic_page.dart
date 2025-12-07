@@ -33,7 +33,9 @@ class _DomesticPageState extends State<DomesticPage> {
     // Inisialisasi ViewModel dan load data provinsi jika belum dimulai
     homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
     if (homeViewModel.provinceList.status == Status.notStarted) {
-      homeViewModel.getProvinceList();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        homeViewModel.getProvinceList();
+      });
     }
   }
 

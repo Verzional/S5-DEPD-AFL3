@@ -131,4 +131,58 @@ class HomeViewModel with ChangeNotifier {
           setLoading(false);
         });
   }
+
+  // State daftar negara untuk pengiriman internasional
+  ApiResponse<List<Country>> countryList = ApiResponse.notStarted();
+  setCountryList(ApiResponse<List<Country>> response) {
+    countryList = response;
+    notifyListeners();
+  }
+
+  // Ambil daftar negara
+  Future getCountryList() async {
+    if (countryList.status == Status.completed) return;
+    setCountryList(ApiResponse.loading());
+    _homeRepo
+        .fetchCountryList()
+        .then((value) {
+          setCountryList(ApiResponse.completed(value));
+        })
+        .onError((error, _) {
+          setCountryList(ApiResponse.error(error.toString()));
+        });
+  }
+
+  // State daftar biaya ongkir internasional
+  ApiResponse<List<Costs>> internationalCostList = ApiResponse.notStarted();
+  setInternationalCostList(ApiResponse<List<Costs>> response) {
+    internationalCostList = response;
+    notifyListeners();
+  }
+
+  // Hitung biaya pengiriman internasional
+  Future checkInternationalShipmentCost(
+    String origin,
+    String destination,
+    int weight,
+    String courier,
+  ) async {
+    setLoading(true);
+    setInternationalCostList(ApiResponse.loading());
+    _homeRepo
+        .checkInternationalShipmentCost(
+          origin,
+          destination,
+          weight,
+          courier,
+        )
+        .then((value) {
+          setInternationalCostList(ApiResponse.completed(value));
+          setLoading(false);
+        })
+        .onError((error, _) {
+          setInternationalCostList(ApiResponse.error(error.toString()));
+          setLoading(false);
+        });
+  }
 }
